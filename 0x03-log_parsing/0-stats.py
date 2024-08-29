@@ -20,7 +20,7 @@ status_codes = {
 }
 
 log_patterns = re.compile(
-    r'(?P<ip>\S+) - \[(?P<date>[^\]]+\]) '
+    r'(?P<ip>\S+) - \[(?P<date>[^\]]+)\] '
     r'"(?P<request>[^"]+)" (?P<status_code>\d{3}) '
     r'(?P<file_size>\d+)'
 )
@@ -28,10 +28,10 @@ log_patterns = re.compile(
 
 def print_status(status_codes: dict, total_size: int) -> None:
     """Prints the status codes and total file size"""
-    print("File size: {:d}".format(total_size))
+    print("File size:", total_size)
     for code in status_codes.keys():
-        if status_codes[code] >= 0:
-            print("{:s}: {:d}".format(code, status_codes[code]))
+        if status_codes[code] > 0:
+            print(f"{code}: {status_codes[code]}")
 
 
 def signal_handler(sig, frame):
