@@ -1,5 +1,7 @@
 #!/usr/bin/python3
-"""Reads standard-in line by line and computes metrics"""
+'''Reads stdin line by line and returns the total file size
+and the amount of each present status code'''
+
 
 import re
 import signal
@@ -19,15 +21,16 @@ status_codes = {
     '500': 0
 }
 
-log_patterns = re.compile(
+
+log_pattern = re.compile(
     r'(?P<ip>\S+) - \[(?P<date>[^\]]+)\] '
     r'"(?P<request>[^"]+)" (?P<status_code>\d{3}) '
     r'(?P<file_size>\d+)'
 )
 
 
-def print_status(status_codes: dict, total_size: int) -> None:
-    """Prints the status codes and total file size"""
+def print_stats(status_codes: dict, total_size: int) -> None:
+    '''Prints the accumulated file size and counts of status codes'''
     print("File size:", total_size)
     for code in status_codes.keys():
         if status_codes[code] > 0:
@@ -35,8 +38,8 @@ def print_status(status_codes: dict, total_size: int) -> None:
 
 
 def signal_handler(sig, frame):
-    """Handles SIGINT signal"""
-    print_status(status_codes, total_size)
+    '''Handles Crtl+C signal to print stats before exiting'''
+    print_stats(status_codes, total_size)
     sys.exit(0)
 
 
@@ -44,7 +47,7 @@ signal.signal(signal.SIGINT, signal_handler)
 
 try:
     for line in sys.stdin:
-        match = log_patterns.match(line)
+        match = log_pattern.match(line)
         if match:
             file_size = int(match.group('file_size'))
             code = match.group('status_code')
@@ -54,10 +57,11 @@ try:
 
             line_count += 1
             if line_count == 10:
-                print_status(status_codes, total_size)
+                print_stats(status_codes, total_size)
                 line_count = 0
+
 except (KeyboardInterrupt, EOFError):
-    print_status(status_codes, total_size)
+    print_stats(status_codes, total_size)
     sys.exit(0)
 
-print_status(status_codes, total_size)
+print_stats(status_codes, total_size)
